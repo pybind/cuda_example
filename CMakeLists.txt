@@ -14,8 +14,8 @@ project(
 find_package(pybind11 CONFIG REQUIRED)
 
 # Add a library using FindPython's tooling (pybind11 also provides a helper like
-# this), combining the pybind11 bindings with the CUDA kernels.
-python_add_library(_core MODULE src/main.cpp src/add.cu WITH_SOABI)
+# this), combining the pybind11 bindings with the CPU and CUDA implementations.
+python_add_library(_core MODULE src/main.cpp src/mandelbrot_cpu.cpp src/mandelbrot.cu WITH_SOABI)
 target_link_libraries(_core PRIVATE pybind11::headers)
 
 # This is passing in the version as a define just as an example
