@@ -18,33 +18,17 @@ from numpy import int32
 from numpy.typing import NDArray
 
 def mandelbrot_cpu(
-    width: int = ...,
-    height: int = ...,
-    max_iterations: int = ...,
-    xmin: float = ...,
-    xmax: float = ...,
-    ymin: float = ...,
-    ymax: float = ...,
+    width: int = ..., height: int = ..., max_iterations: int = ...
 ) -> NDArray[int32]:
     """
-    Render the Mandelbrot set on the CPU.
-
-    Returns a ``(height, width)`` int32 array of escape counts.
+    Render the Mandelbrot set on the CPU, returning a (height, width) int32 array.
     """
 
 def mandelbrot_gpu(
-    width: int = ...,
-    height: int = ...,
-    max_iterations: int = ...,
-    xmin: float = ...,
-    xmax: float = ...,
-    ymin: float = ...,
-    ymax: float = ...,
+    width: int = ..., height: int = ..., max_iterations: int = ...
 ) -> NDArray[int32]:
     """
-    Render the Mandelbrot set on the GPU with CUDA.
-
-    Returns a ``(height, width)`` int32 array of escape counts.
+    Render the Mandelbrot set on the GPU, returning a (height, width) int32 array.
     """
 
 def cuda_available() -> bool:

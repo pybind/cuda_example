@@ -57,7 +57,7 @@ You can view the result with any plotting library, e.g.:
 ```python
 import matplotlib.pyplot as plt
 
-plt.imshow(image, extent=(-2, 1, -1.25, 1.25), cmap="twilight_shifted")
+plt.imshow(image, extent=(-2, 1, -1.5, 1.5), cmap="twilight_shifted")
 plt.show()
 ```
 

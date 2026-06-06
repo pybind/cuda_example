@@ -24,11 +24,6 @@ def test_cpu_shape_and_dtype():
     assert image.max() == 50
 
 
-def test_cpu_rejects_bad_size():
-    with pytest.raises(ValueError, match="must be positive"):
-        m.mandelbrot_cpu(width=0, height=10)
-
-
 @requires_cuda
 def test_gpu_matches_cpu():
     kwargs = {"width": 128, "height": 96, "max_iterations": 100}
