@@ -1,5 +1,5 @@
 package:
-  name: cmake_example
+  name: scikit_build_example
   version: 0.0.1
 
 source:
@@ -7,32 +7,37 @@ source:
 
 build:
   number: 0
-  script: {{ PYTHON }} -m pip install . -vvv
+  script:
+    - unset CMAKE_GENERATOR && {{ PYTHON }} -m pip install . -vv  # [not win]
+    - {{ PYTHON }} -m pip install . -vv  # [win]
 
 requirements:
   build:
-    - "{{ compiler('cxx') }}"
-    - cmake
-    - ninja
+    - python
+    - {{ compiler('cxx') }}
 
   host:
+    - cmake
+    - ninja
     - python
-    - pip !=22.1.0
+    - pip
+    - scikit-build-core
+    - pybind11 >=2.10.0
 
   run:
     - python
 
 
 test:
+  imports:
+    - scikit_build_example
   requires:
     - pytest
-  imports:
-    - cmake_example
   source_files:
     - tests
   commands:
-    - python -m pytest
+    - pytest tests
 
 about:
-  summary: A CMake example project built with pybind11.
+  summary: An example project built with pybind11 and scikit-build.
   license_file: LICENSE

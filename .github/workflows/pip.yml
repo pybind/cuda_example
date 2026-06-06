@@ -1,4 +1,4 @@
-name: Pip
+name: "Pip"
 
 on:
   workflow_dispatch:
@@ -9,28 +9,24 @@ on:
 
 jobs:
   build:
+    name: Build with Pip
+    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, macos-13, ubuntu-latest]
-        python-version: ["3.7", "3.11"]
-
-    runs-on: ${{ matrix.platform }}
+        platform: [windows-latest, macos-latest, ubuntu-latest]
+        python-version: ["3.9", "3.14", "pypy-3.10"]
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+    - uses: actions/checkout@v6
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Add requirements
-      run: python -m pip install --upgrade wheel setuptools
+        allow-prereleases: true
 
     - name: Build and install
-      run: pip install --verbose .[test]
+      run: pip install --verbose . --group test
 
     - name: Test
-      run: python -m pytest
+      run: pytest

@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-12]
-        python-version: ["3.8", "3.10"]
+        platform: [ubuntu-latest]
+        python-version: ["3.10", "3.13"]
 
     runs-on: ${{ matrix.platform }}
 
@@ -23,26 +23,22 @@ jobs:
         shell: "bash -l {0}"
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+      - uses: actions/checkout@v6
 
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v3.0.4
+        uses: conda-incubator/setup-miniconda@v3.3.0
         with:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
-          channel-priority: strict
 
-      # Currently conda-build requires the dead package "toml" but doesn't declare it
       - name: Prepare
-        run: conda install conda-build conda-verify pytest toml
+        run: conda install conda-build conda-verify pytest
 
       - name: Build
         run: conda build conda.recipe
 
       - name: Install
-        run: conda install -c ${CONDA_PREFIX}/conda-bld/ cmake_example
+        run: conda install -c ${CONDA_PREFIX}/conda-bld/ scikit_build_example
 
       - name: Test
-        run: python -m pytest
+        run: pytest tests

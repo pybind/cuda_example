@@ -19,7 +19,7 @@ ci:
 repos:
 # Standard hooks
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v6.0.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -33,26 +33,18 @@ repos:
   - id: requirements-txt-fixer
   - id: trailing-whitespace
 
+# Check linting and style issues
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: "v0.4.2"
+  rev: "v0.15.7"
   hooks:
     - id: ruff
       args: ["--fix", "--show-fixes"]
     - id: ruff-format
       exclude: ^(docs)
 
-# Checking static types
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: "v1.10.0"
-  hooks:
-    - id: mypy
-      files: "setup.py"
-      args: []
-      additional_dependencies: [types-setuptools]
-
 # Changes tabs to spaces
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.5.5
+  rev: v1.5.6
   hooks:
   - id: remove-tabs
     exclude: ^(docs)
