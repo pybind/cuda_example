@@ -23,29 +23,16 @@ PYBIND11_MODULE(_core, m, py::mod_gil_not_used(), py::multiple_interpreters::per
     )pbdoc";
 
     m.def("add", &add, R"pbdoc(
-        Add two numbers
-
-        Runs on the GPU with CUDA when a device is available, otherwise falls
-        back to the CPU.
+        Add two numbers on the GPU with a CUDA kernel.
     )pbdoc");
 
-    m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-        Subtract two numbers
-
-        Some other explanation about the subtract function.
+    m.def("subtract", &subtract, R"pbdoc(
+        Subtract two numbers on the GPU with a CUDA kernel.
     )pbdoc");
 
     m.def("cuda_available", &cuda_available, R"pbdoc(
         Return True if a CUDA-capable device is available at runtime.
     )pbdoc");
-
-    // True if the extension was compiled with the CUDA Toolkit, regardless of
-    // whether a device is present at runtime.
-#ifdef WITH_CUDA
-    m.attr("WITH_CUDA") = true;
-#else
-    m.attr("WITH_CUDA") = false;
-#endif
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

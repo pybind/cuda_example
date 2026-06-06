@@ -14,21 +14,14 @@ Pybind11 + CUDA example plugin
 
 from __future__ import annotations
 
-WITH_CUDA: bool
-
 def add(i: int, j: int) -> int:
     """
-    Add two numbers
-
-    Runs on the GPU with CUDA when a device is available, otherwise falls
-    back to the CPU.
+    Add two numbers on the GPU with a CUDA kernel.
     """
 
 def subtract(i: int, j: int) -> int:
     """
-    Subtract two numbers
-
-    Some other explanation about the subtract function.
+    Subtract two numbers on the GPU with a CUDA kernel.
     """
 
 def cuda_available() -> bool:

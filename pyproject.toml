@@ -50,21 +50,14 @@ testpaths = ["tests"]
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-enable = ["pypy"]
+# Building requires the CUDA Toolkit, which is only present in the custom
+# manylinux CUDA images (see the wheels workflow). Restrict to CPython on
+# manylinux; musllinux and PyPy have no matching CUDA image.
+build = "cp3*"
+skip = "*-musllinux*"
 test-command = "python -m pytest tests"
 test-sources = ["pyproject.toml", "tests"]
 test-groups = ["test"]
-
-[tool.cibuildwheel.pyodide]
-build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
-
-[tool.cibuildwheel.ios]
-build-frontend = "build"
-xbuild-tools = ["cmake", "ninja"]
-
-[tool.cibuildwheel.android]
-build-frontend = "build"
-environment.ANDROID_API_LEVEL = "24"
 
 [tool.ruff.lint]
 extend-select = [

@@ -23,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-      with:
-        submodules: true
 
     - name: Build SDist
       run: pipx run build --sdist
@@ -39,21 +37,34 @@ jobs:
 
 
   build_wheels:
-    name: Wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Wheels on ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-15-intel, macos-latest, windows-latest, ubuntu-24.04-arm, windows-11-arm]
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+
+    # The CUDA Toolkit ships inside these custom manylinux images, so nvcc is
+    # available during the build (see https://github.com/pypa/cibuildwheel/pull/2896).
+    # Bump the CUDA version here; to publish wheels for several CUDA versions you
+    # would also need distinct local version labels (e.g. 0.0.1+cu131).
+    env:
+      CUDA_VERSION: "13_1"
+      MANYLINUX_BASE: manylinux_2_28
 
     steps:
     - uses: actions/checkout@v6
-      with:
-        submodules: true
-
-    - uses: astral-sh/setup-uv@v8.0.0
 
     - uses: pypa/cibuildwheel@v3.4
+      env:
+        CIBW_MANYLINUX_X86_64_IMAGE: >-
+          quay.io/manylinux_cuda/${{ env.MANYLINUX_BASE }}_x86_64_cuda${{ env.CUDA_VERSION }}:latest
+        CIBW_MANYLINUX_AARCH64_IMAGE: >-
+          quay.io/manylinux_cuda/${{ env.MANYLINUX_BASE }}_aarch64_cuda${{ env.CUDA_VERSION }}:latest
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -61,7 +72,7 @@ jobs:
 
     - uses: actions/upload-artifact@v7
       with:
-        name: cibw-wheels-${{ matrix.os }}
+        name: cibw-wheels-${{ matrix.arch }}
         path: wheelhouse/*.whl
 
 

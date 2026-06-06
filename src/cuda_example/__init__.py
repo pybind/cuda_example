@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from ._core import (
-    WITH_CUDA,
     __doc__,
     __version__,
     add,
@@ -10,7 +9,6 @@ from ._core import (
 )
 
 __all__ = [
-    "WITH_CUDA",
     "__doc__",
     "__version__",
     "add",
