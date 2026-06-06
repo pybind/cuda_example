@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import scikit_build_example as m
+import cuda_example as m
 
 
 def test_version():
@@ -13,3 +13,11 @@ def test_add():
 
 def test_sub():
     assert m.subtract(1, 2) == -1
+
+
+def test_cuda_available():
+    # cuda_available() reflects whether a device is present at runtime; it must
+    # be False unless the wheel was built with CUDA and a GPU is visible.
+    available = m.cuda_available()
+    assert isinstance(available, bool)
+    assert not available or m.WITH_CUDA

@@ -38,7 +38,7 @@ jobs:
         run: conda build conda.recipe
 
       - name: Install
-        run: conda install -c ${CONDA_PREFIX}/conda-bld/ scikit_build_example
+        run: conda install -c ${CONDA_PREFIX}/conda-bld/ cuda_example
 
       - name: Test
         run: pytest tests
