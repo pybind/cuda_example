@@ -1,5 +1,5 @@
 package:
-  name: scikit_build_example
+  name: cuda_example
   version: 0.0.1
 
 source:
@@ -22,7 +22,7 @@ requirements:
     - python
     - pip
     - scikit-build-core
-    - pybind11 >=2.10.0
+    - pybind11 >=3.0.0
 
   run:
     - python
@@ -30,7 +30,7 @@ requirements:
 
 test:
   imports:
-    - scikit_build_example
+    - cuda_example
   requires:
     - pytest
   source_files:
@@ -39,5 +39,5 @@ test:
     - pytest tests
 
 about:
-  summary: An example project built with pybind11 and scikit-build.
+  summary: An example project built with pybind11, CUDA, and scikit-build-core.
   license_file: LICENSE

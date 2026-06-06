@@ -1,1 +1,1 @@
-.. automodule:: scikit_build_example
+.. automodule:: cuda_example

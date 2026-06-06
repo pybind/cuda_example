@@ -1,5 +1,5 @@
-python_example Documentation
-============================
+cuda_example Documentation
+==========================
 
 Contents:
 

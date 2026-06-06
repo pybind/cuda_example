@@ -49,15 +49,6 @@ repos:
   - id: remove-tabs
     exclude: ^(docs)
 
-# CMake formatting
-- repo: https://github.com/cheshirekow/cmake-format-precommit
-  rev: v0.6.13
-  hooks:
-  - id: cmake-format
-    additional_dependencies: [pyyaml]
-    types: [file]
-    files: (\.cmake|CMakeLists.txt)(.in)?$
-
 # Suggested hook if you add a .clang-format file
 # - repo: https://github.com/pre-commit/mirrors-clang-format
 #  rev: v13.0.0
