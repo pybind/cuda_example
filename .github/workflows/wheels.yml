@@ -48,23 +48,13 @@ jobs:
           - arch: aarch64
             runner: ubuntu-24.04-arm
 
-    # The CUDA Toolkit ships inside these custom manylinux images, so nvcc is
-    # available during the build (see https://github.com/pypa/cibuildwheel/pull/2896).
-    # Bump the CUDA version here; to publish wheels for several CUDA versions you
-    # would also need distinct local version labels (e.g. 0.0.1+cu131).
-    env:
-      CUDA_VERSION: "13_1"
-      MANYLINUX_BASE: manylinux_2_28
-
     steps:
     - uses: actions/checkout@v6
 
+    # The CUDA manylinux images (with nvcc) are configured in pyproject.toml.
+    # Override them with CIBW_MANYLINUX_*_IMAGE here to target a different CUDA
+    # version (see the README).
     - uses: pypa/cibuildwheel@v3.4
-      env:
-        CIBW_MANYLINUX_X86_64_IMAGE: >-
-          quay.io/manylinux_cuda/${{ env.MANYLINUX_BASE }}_x86_64_cuda${{ env.CUDA_VERSION }}:latest
-        CIBW_MANYLINUX_AARCH64_IMAGE: >-
-          quay.io/manylinux_cuda/${{ env.MANYLINUX_BASE }}_aarch64_cuda${{ env.CUDA_VERSION }}:latest
 
     - name: Verify clean directory
       run: git diff --exit-code
