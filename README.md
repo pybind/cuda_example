@@ -1,92 +1,92 @@
-# cmake_example for pybind11
+# scikit_build_example
 
 [![Gitter][gitter-badge]][gitter-link]
 
 |      CI              | status |
 |----------------------|--------|
-| MSVC 2019            | [![AppVeyor][appveyor-badge]][appveyor-link] |
 | conda.recipe         | [![Conda Actions Status][actions-conda-badge]][actions-conda-link] |
 | pip builds           | [![Pip Actions Status][actions-pip-badge]][actions-pip-link] |
-| [`cibuildwheel`][]   | [![Wheels Actions Status][actions-wheels-badge]][actions-wheels-link] |
+
+
+An example project built with [pybind11][] and [scikit-build-core][]. Python
+3.9+ (see older commits for 3.7+, or even older versions of Python using [scikit-build (classic)][]).
+
 
 [gitter-badge]:            https://badges.gitter.im/pybind/Lobby.svg
 [gitter-link]:             https://gitter.im/pybind/Lobby
-[actions-badge]:           https://github.com/pybind/cmake_example/workflows/Tests/badge.svg
-[actions-conda-link]:      https://github.com/pybind/cmake_example/actions?query=workflow%3A%22Conda
-[actions-conda-badge]:     https://github.com/pybind/cmake_example/workflows/Conda/badge.svg
-[actions-pip-link]:        https://github.com/pybind/cmake_example/actions?query=workflow%3A%22Pip
-[actions-pip-badge]:       https://github.com/pybind/cmake_example/workflows/Pip/badge.svg
-[actions-wheels-link]:     https://github.com/pybind/cmake_example/actions?query=workflow%3AWheels
-[actions-wheels-badge]:    https://github.com/pybind/cmake_example/workflows/Wheels/badge.svg
-[appveyor-link]:           https://ci.appveyor.com/project/dean0x7d/cmake-example/branch/master
-[appveyor-badge]:          https://ci.appveyor.com/api/projects/status/57nnxfm4subeug43/branch/master?svg=true
-
-An example [pybind11](https://github.com/pybind/pybind11) module built with a
-CMake-based build system. This is useful for C++ codebases that have an
-existing CMake project structure. This is being replaced by
-[`scikit_build_example`](https://github.com/pybind/scikit_build_example), which uses
-[scikit-build-core][], which is designed to allow Python
-packages to be driven from CMake without depending on setuptools. The approach here has
-some trade-offs not present in a pure setuptools build (see
-[`python_example`](https://github.com/pybind/python_example)) or scikit-build-core. Python 3.7+ required;
-see the commit history for older versions of Python.
-
-Problems vs. scikit-build-core based example:
-
-- You have to manually copy fixes/additions when they get added to this example (like when Apple Silicon support was added)
-- Modern editable installs are not supported (scikit-build-core doesn't support them either yet, but probably will soon)
-- You are depending on setuptools, which can and will change
-- You are stuck with an all-or-nothing approach to adding cmake/ninja via wheels (scikit-build-core adds these only as needed, so it can be used on BSD, Cygwin, Pyodide, Android, etc)
-- You are stuck with whatever CMake ships with (scikit-build-core backports FindPython for you)
-
-
-## Prerequisites
-
-* A compiler with C++11 support
-* Pip 10+ or CMake >= 3.4 (or 3.14+ on Windows, which was the first version to support VS 2019)
-* Ninja or Pip 10+
-
+[actions-badge]:           https://github.com/pybind/scikit_build_example/workflows/Tests/badge.svg
+[actions-conda-link]:      https://github.com/pybind/scikit_build_example/actions?query=workflow%3AConda
+[actions-conda-badge]:     https://github.com/pybind/scikit_build_example/workflows/Conda/badge.svg
+[actions-pip-link]:        https://github.com/pybind/scikit_build_example/actions?query=workflow%3APip
+[actions-pip-badge]:       https://github.com/pybind/scikit_build_example/workflows/Pip/badge.svg
+[actions-wheels-link]:     https://github.com/pybind/scikit_build_example/actions?query=workflow%3AWheels
+[actions-wheels-badge]:    https://github.com/pybind/scikit_build_example/workflows/Wheels/badge.svg
 
 ## Installation
 
-Just clone this repository and pip install. Note the `--recursive` option which is
-needed for the pybind11 submodule:
-
-```bash
-git clone --recursive https://github.com/pybind/cmake_example.git
-pip install ./cmake_example
-```
-
-With the `setup.py` file included in this example, the `pip install` command will
-invoke CMake and build the pybind11 module as specified in `CMakeLists.txt`.
-
-
-
-## Building the documentation
-
-Documentation for the example project is generated using Sphinx. Sphinx has the
-ability to automatically inspect the signatures and documentation strings in
-the extension module to generate beautiful documentation in a variety formats.
-The following command generates HTML-based reference documentation; for other
-formats please refer to the Sphinx manual:
-
- - `cd cmake_example/docs`
- - `make html`
-
-
-## License
-
-Pybind11 is provided under a BSD-style license that can be found in the LICENSE
-file. By using, distributing, or contributing to this project, you agree to the
-terms and conditions of this license.
-
+- Clone this repository
+- `pip install ./scikit_build_example`
 
 ## Test call
 
 ```python
-import cmake_example
-cmake_example.add(1, 2)
+import scikit_build_example
+
+scikit_build_example.add(1, 2)
 ```
 
-[`cibuildwheel`]:    https://cibuildwheel.readthedocs.io
-[scikit-build-core]: https://github.com/scikit-build/scikit-build-core
+## Files
+
+This example has several files that are a good idea, but aren't strictly
+necessary. The necessary files are:
+
+* `pyproject.toml`: The Python project file
+* `CMakeLists.txt`: The CMake configuration file
+* `src/main.cpp`: The source file for the C++ build
+* `src/scikit_build_example/__init__.py`: The Python portion of the module. The root of the module needs to be `<package_name>`, `src/<package_name>`, or `python/<package_name>` to be auto-discovered.
+
+These files are also expected and highly recommended:
+
+* `.gitignore`: Git's ignore list, also used by `scikit-build-core` to select files for the SDist
+* `README.md`: The source for the PyPI description
+* `LICENSE`: The license file
+
+There are also several completely optional directories:
+
+* `.github`: configuration for [Dependabot][] and [GitHub Actions][]
+* `conda.recipe`: Example recipe. Normally you should submit projects to conda-forge instead of building them yourself, but this is useful for testing the example.
+* `docs/`: Documentation
+* `tests/`: Tests go here
+
+And some optional files:
+
+* `.pre-commit-config.yaml`: Configuration for the fantastic static-check runner [pre-commit][].
+* `noxfile.py`: Configuration for the [nox][] task runner, which helps make setup easier for contributors.
+
+This is a simplified version of the recommendations in the [Scientific-Python
+Development Guide][], which is a _highly_ recommended read for anyone
+interested in Python package development (Scientific or not). The guide also
+has a cookiecutter that includes scikit-build-core and pybind11 as a backend
+choice.
+
+### CI Examples
+
+There are examples for CI in `.github/workflows`. A simple way to produces
+binary "wheels" for all platforms is illustrated in the "wheels.yml" file,
+using [cibuildwheel][].
+
+## License
+
+pybind11 is provided under a BSD-style license that can be found in the LICENSE
+file. By using, distributing, or contributing to this project, you agree to the
+terms and conditions of this license.
+
+[cibuildwheel]: https://cibuildwheel.readthedocs.io
+[scientific-python development guide]: https://learn.scientific-python.org/development
+[dependabot]: https://docs.github.com/en/code-security/dependabot
+[github actions]: https://docs.github.com/en/actions
+[pre-commit]: https://pre-commit.com
+[nox]: https://nox.thea.codes
+[pybind11]: https://pybind11.readthedocs.io
+[scikit-build-core]: https://scikit-build-core.readthedocs.io
+[scikit-build (classic)]: https://scikit-build.readthedocs.io
