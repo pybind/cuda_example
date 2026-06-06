@@ -8,25 +8,31 @@ on:
       - master
 
 jobs:
-  build:
-    name: Build with Pip
-    runs-on: ${{ matrix.platform }}
+  # Build the CUDA extension inside the manylinux images that ship the CUDA
+  # Toolkit (see https://github.com/pypa/cibuildwheel/pull/2896). GitHub's
+  # runners have no GPU, so this compiles the kernels and imports the module;
+  # the GPU tests are skipped (`cuda_available()` is False).
+  cuda:
+    name: Build with CUDA (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    container: quay.io/manylinux_cuda/manylinux_2_28_${{ matrix.arch }}_cuda13_1:latest
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, macos-latest, ubuntu-latest]
-        python-version: ["3.9", "3.14", "pypy-3.10"]
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
 
     steps:
     - uses: actions/checkout@v6
 
-    - uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-        allow-prereleases: true
-
     - name: Build and install
-      run: pip install --verbose . --group test
+      run: |
+        /opt/python/cp312-cp312/bin/python -m venv /tmp/venv
+        /tmp/venv/bin/pip install --upgrade pip
+        /tmp/venv/bin/pip install --verbose . --group test
 
     - name: Test
-      run: pytest
+      run: /tmp/venv/bin/pytest

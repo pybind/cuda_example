@@ -4,27 +4,24 @@
 
 |      CI              | status |
 |----------------------|--------|
-| conda.recipe         | [![Conda Actions Status][actions-conda-badge]][actions-conda-link] |
 | pip builds           | [![Pip Actions Status][actions-pip-badge]][actions-pip-link] |
+| wheels               | [![Wheels Actions Status][actions-wheels-badge]][actions-wheels-link] |
 
 
 An example project built with [pybind11][], [CUDA][], and
 [scikit-build-core][]. Python 3.9+.
 
-The extension exposes a tiny `add` function that runs on the GPU with a CUDA
-kernel when a device is available, and otherwise falls back to the CPU. The
-build is conditional: if the CUDA Toolkit (`nvcc`) is found at configure time,
-the real kernel in `src/add.cu` is compiled; otherwise the CPU implementation in
-`src/add_cpu.cpp` is used. This keeps the example buildable everywhere (macOS,
-Windows, PyPy, Pyodide, ...) while still demonstrating a real CUDA build on
-Linux.
+The extension exposes tiny `add` and `subtract` functions that run on the GPU
+with CUDA kernels (`src/add.cu`). Building **requires** the CUDA Toolkit
+(`nvcc`): the CMake project declares CUDA as a required language, so
+configuration fails without it. The CUDA runtime is linked statically, so the
+resulting wheels do not depend on `libcudart` and stay importable on machines
+without a GPU — running `add`/`subtract` there raises, but `cuda_available()`
+lets you check first.
 
 
 [gitter-badge]:            https://badges.gitter.im/pybind/Lobby.svg
 [gitter-link]:             https://gitter.im/pybind/Lobby
-[actions-badge]:           https://github.com/pybind/cuda_example/workflows/Tests/badge.svg
-[actions-conda-link]:      https://github.com/pybind/cuda_example/actions?query=workflow%3AConda
-[actions-conda-badge]:     https://github.com/pybind/cuda_example/workflows/Conda/badge.svg
 [actions-pip-link]:        https://github.com/pybind/cuda_example/actions?query=workflow%3APip
 [actions-pip-badge]:       https://github.com/pybind/cuda_example/workflows/Pip/badge.svg
 [actions-wheels-link]:     https://github.com/pybind/cuda_example/actions?query=workflow%3AWheels
@@ -35,24 +32,22 @@ Linux.
 - Clone this repository
 - `pip install ./cuda_example`
 
-If the CUDA Toolkit is installed, the GPU implementation is built automatically.
+The CUDA Toolkit (`nvcc`) must be installed and discoverable by CMake.
 
 ## Test call
 
 ```python
 import cuda_example
 
-cuda_example.add(1, 2)       # 3 (on the GPU if one is available)
-cuda_example.cuda_available()  # True if a CUDA device is visible at runtime
-cuda_example.WITH_CUDA         # True if the wheel was compiled with CUDA
+if cuda_example.cuda_available():
+    cuda_example.add(1, 2)       # 3, computed on the GPU
+    cuda_example.subtract(1, 2)  # -1, computed on the GPU
 ```
 
 ## Building CUDA wheels
 
-The default `Wheels` workflow builds the CPU fallback on every platform using
-[cibuildwheel][]. To build CUDA-enabled Linux wheels, the
-`.github/workflows/cibw-cuda.yaml` workflow points cibuildwheel at the custom
-manylinux images that ship the CUDA Toolkit (see
+The `Wheels` workflow builds CUDA-enabled Linux wheels with [cibuildwheel][] by
+pointing it at the custom manylinux images that ship the CUDA Toolkit (see
 [pypa/cibuildwheel#2896][cibw-cuda]):
 
 ```yaml
@@ -63,10 +58,44 @@ manylinux images that ship the CUDA Toolkit (see
 ```
 
 The CUDA runtime is linked statically (`CUDA_RUNTIME_LIBRARY Static`), so the
-resulting wheels do not depend on `libcudart` and remain importable on machines
-without a GPU (where `add` transparently falls back to the CPU). GitHub-hosted
-runners have no GPU, so the wheels are compiled and imported, but the kernel
-itself only runs on a machine with a CUDA device.
+resulting wheels do not depend on `libcudart`. GitHub-hosted runners have no
+GPU, so the wheels are compiled and imported, but the kernels themselves only
+run on a machine with a CUDA device.
+
+## Testing the CUDA build locally with Docker
+
+You don't need a GPU (or even a Linux machine) to compile and import the CUDA
+build — the manylinux images ship the CUDA Toolkit, so `nvcc` runs inside the
+container. The kernels are *compiled* and the wheel is *imported*; they just
+can't *execute* on the GPU without a device (those tests are skipped).
+
+Pick the image matching your host architecture (the `aarch64` image runs
+natively on Apple Silicon; on x86_64 use the `x86_64` image):
+
+```bash
+# Apple Silicon / arm64 host:
+IMAGE=quay.io/manylinux_cuda/manylinux_2_28_aarch64_cuda13_1:latest
+# x86_64 host:
+# IMAGE=quay.io/manylinux_cuda/manylinux_2_28_x86_64_cuda13_1:latest
+
+mkdir -p wheelhouse
+docker run --rm \
+  -v "$PWD":/io:ro \
+  -v "$PWD/wheelhouse":/wheelhouse \
+  "$IMAGE" bash -lc '
+    PY=/opt/python/cp312-cp312/bin/python
+    cp -r /io /tmp/src && cd /tmp/src
+    $PY -m pip install --upgrade pip build pytest
+    $PY -m build --wheel --outdir /wheelhouse .   # compiles src/add.cu with nvcc
+    $PY -m pip install /wheelhouse/*.whl
+    $PY -m pytest                                  # GPU tests skip (no device)
+  '
+```
+
+The compiled wheel is written to `./wheelhouse/` on the host, so you can inspect
+or install it afterwards. Because the container has no GPU, `cuda_available()`
+returns `False` and the `add`/`subtract` tests are skipped. The same flow runs
+in CI in the `cuda` job of `.github/workflows/pip.yml`.
 
 ## Files
 
@@ -74,10 +103,9 @@ This example has several files that are a good idea, but aren't strictly
 necessary. The necessary files are:
 
 * `pyproject.toml`: The Python project file
-* `CMakeLists.txt`: The CMake configuration file, which conditionally enables CUDA
+* `CMakeLists.txt`: The CMake configuration file, which requires the CUDA language
 * `src/main.cpp`: The pybind11 bindings
-* `src/add.cu`: The CUDA kernel implementation (built when CUDA is available)
-* `src/add_cpu.cpp`: The CPU fallback (built when CUDA is not available)
+* `src/add.cu`: The CUDA kernels (`add`/`subtract`) and runtime device query
 * `src/add.h`: The shared declarations
 * `src/cuda_example/__init__.py`: The Python portion of the module. The root of the module needs to be `<package_name>`, `src/<package_name>`, or `python/<package_name>` to be auto-discovered.
 
@@ -90,7 +118,6 @@ These files are also expected and highly recommended:
 There are also several completely optional directories:
 
 * `.github`: configuration for [Dependabot][] and [GitHub Actions][]
-* `conda.recipe`: Example recipe. Normally you should submit projects to conda-forge instead of building them yourself, but this is useful for testing the example.
 * `docs/`: Documentation
 * `tests/`: Tests go here
 
@@ -107,10 +134,10 @@ choice.
 
 ### CI Examples
 
-There are examples for CI in `.github/workflows`. A simple way to produce
-binary "wheels" for all platforms is illustrated in the "wheels.yml" file,
-using [cibuildwheel][]. The "cibw-cuda.yaml" file shows how to build
-CUDA-enabled wheels on Linux.
+There are examples for CI in `.github/workflows`. The "wheels.yml" file builds
+CUDA-enabled binary "wheels" for Linux (x86_64 and aarch64) using
+[cibuildwheel][], and "pip.yml" does a quick build-and-import check in the CUDA
+containers.
 
 ## License
 
