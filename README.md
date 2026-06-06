@@ -85,16 +85,30 @@ assert (cpu == gpu).all()  # identical results, very different runtimes
 
 ## Building CUDA wheels
 
-The `Wheels` workflow builds CUDA-enabled Linux wheels with [cibuildwheel][] by
-pointing it at the custom manylinux images that ship the CUDA Toolkit (see
-[pypa/cibuildwheel#2896][cibw-cuda]):
+The `Wheels` workflow builds CUDA-enabled Linux wheels with [cibuildwheel][],
+using the custom manylinux images that ship the CUDA Toolkit (see
+[pypa/cibuildwheel#2896][cibw-cuda]). The images are configured in
+`pyproject.toml`:
 
-```yaml
-- uses: pypa/cibuildwheel@v3.4
-  env:
-    CIBW_MANYLINUX_X86_64_IMAGE: quay.io/manylinux_cuda/manylinux_2_28_x86_64_cuda13_1:latest
-    CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/manylinux_cuda/manylinux_2_28_aarch64_cuda13_1:latest
+```toml
+[tool.cibuildwheel]
+manylinux-x86_64-image = "quay.io/manylinux_cuda/manylinux_2_28_x86_64_cuda13_1:latest"
+manylinux-aarch64-image = "quay.io/manylinux_cuda/manylinux_2_28_aarch64_cuda13_1:latest"
 ```
+
+To target a different CUDA version (e.g. an older `cuda12_9` to support older
+drivers) without editing `pyproject.toml`, override the images with environment
+variables when running cibuildwheel:
+
+```bash
+export CIBW_MANYLINUX_X86_64_IMAGE=quay.io/manylinux_cuda/manylinux_2_28_x86_64_cuda12_9:latest
+export CIBW_MANYLINUX_AARCH64_IMAGE=quay.io/manylinux_cuda/manylinux_2_28_aarch64_cuda12_9:latest
+cibuildwheel
+```
+
+The available images are listed in [the cibuildwheel docs][cibw-cuda]; the
+`manylinux_2_28`/`manylinux_2_34` base and `cuda12_9`/`cuda13_1` version can be
+mixed and matched.
 
 The CUDA runtime is linked statically (`CUDA_RUNTIME_LIBRARY Static`), so the
 resulting wheels do not depend on `libcudart`. GitHub-hosted runners have no

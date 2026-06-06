@@ -52,9 +52,11 @@ testpaths = ["tests"]
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
 # Building requires the CUDA Toolkit, which is only present in the custom
-# manylinux CUDA images (see the wheels workflow). Restrict to CPython on
-# manylinux; musllinux and PyPy have no matching CUDA image.
-build = "cp3*"
+# manylinux CUDA images (https://github.com/pypa/cibuildwheel/pull/2896).
+# Override these to target a different CUDA version
+manylinux-x86_64-image = "quay.io/manylinux_cuda/manylinux_2_28_x86_64_cuda13_1:latest"
+manylinux-aarch64-image = "quay.io/manylinux_cuda/manylinux_2_28_aarch64_cuda13_1:latest"
+# Restrict to CPython on manylinux; musllinux and PyPy have no matching CUDA image.
 skip = "*-musllinux*"
 test-command = "python -m pytest tests"
 test-sources = ["pyproject.toml", "tests"]
