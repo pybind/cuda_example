@@ -25,10 +25,11 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Private :: Do Not Upload",
 ]
+dependencies = ["numpy"]
 
 
 [dependency-groups]
-test = ["pytest"]
+test = ["pytest", "numpy"]
 dev = [{ include-group = "test" }]
 
 
