@@ -22,7 +22,7 @@ jobs:
     name: Build SDist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Build SDist
       run: pipx run build --sdist
@@ -49,12 +49,12 @@ jobs:
             runner: ubuntu-24.04-arm
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     # The CUDA manylinux images (with nvcc) are configured in pyproject.toml.
     # Override them with CIBW_MANYLINUX_*_IMAGE here to target a different CUDA
     # version (see the README).
-    - uses: pypa/cibuildwheel@v3.4
+    - uses: pypa/cibuildwheel@v4.1
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -77,7 +77,7 @@ jobs:
       attestations: write
 
     steps:
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: "3.x"
 
