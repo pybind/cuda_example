@@ -12,8 +12,6 @@ Pybind11 + CUDA Mandelbrot example
     cuda_available
 """
 
-from __future__ import annotations
-
 from numpy import int32
 from numpy.typing import NDArray
 
