@@ -54,7 +54,7 @@ jobs:
     # The CUDA manylinux images (with nvcc) are configured in pyproject.toml.
     # Override them with CIBW_MANYLINUX_*_IMAGE here to target a different CUDA
     # version (see the README).
-    - uses: pypa/cibuildwheel@v4.1
+    - uses: pypa/cibuildwheel@v4.2
 
     - name: Verify clean directory
       run: git diff --exit-code
