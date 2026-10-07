@@ -9,7 +9,7 @@
 
 
 An example project built with [pybind11][], [CUDA][], and
-[scikit-build-core][]. Python 3.9+.
+[scikit-build-core][]. Python 3.11+.
 
 The extension renders the [Mandelbrot set][mandelbrot] two ways — once on the
 CPU and once on the GPU — so you can read both side by side and compare their
