@@ -1,0 +1,58 @@
+name: GPU Simulator
+
+# Optional, non-required check. The hosted runners have no GPU, so this builds
+# the CUDA extension and runs the tests, including the GPU Mandelbrot test that
+# is skipped elsewhere, on a simulated NVIDIA H100
+# (https://github.com/pantheongpu/pantheonsim). A simulator cannot reproduce
+# hardware-specific behavior or timing, so it complements real-GPU testing and
+# does not replace it.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "CMakeLists.txt"
+      - "pyproject.toml"
+      - ".github/workflows/gpu-sim.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (CUDA 13.0, simulated H100)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up the simulated GPU and CUDA toolkit
+        uses: pantheongpu/setup-pantheonsim@ca87fe3143b29166822b923d6050945c5179408c # v0.1.5
+        with:
+          gpu: nvidia/h100
+          cuda-toolkit: "13.0"
+
+      # The simulator needs a shared CUDA runtime, but CMakeLists.txt links it
+      # statically, so switch that one line for this job. The simulator runs
+      # the PTX embedded by architecture 90-virtual.
+      - name: Build and install
+        run: |
+          sed -i 's/CUDA_RUNTIME_LIBRARY Static/CUDA_RUNTIME_LIBRARY Shared/' CMakeLists.txt
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install --upgrade pip
+          /tmp/venv/bin/pip install --verbose . --group test \
+            --config-settings=cmake.define.CMAKE_CUDA_ARCHITECTURES=90-virtual
+
+      # -rs lists skipped tests; the GPU test must not be skipped.
+      - name: Test
+        run: vgpu run /tmp/venv/bin/pytest -rs tests
